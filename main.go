@@ -1,19 +1,24 @@
 package main
 
 import (
-	"image"
+	"bounding-brave/sprites"
+	"embed"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+//go:embed assets/*
+var assets embed.FS
+
 type Game struct {
-	backgrounds      []*ebiten.Image
-	characterTileset *ebiten.Image
+	backgrounds []*ebiten.Image
+	hero        *sprites.Character
 }
 
 func (g *Game) Update() error {
+	g.hero.Update()
 	return nil
 }
 
@@ -24,10 +29,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(background, opts)
 	}
 
-	img := g.characterTileset.SubImage(image.Rect(0, 0, 56, 56)).(*ebiten.Image)
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(100, 150)
-	screen.DrawImage(img, opts)
+	g.hero.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -41,7 +43,10 @@ func InitGame() *Game {
 			LoadImage("assets/backgrounds/layer_2.png"),
 			LoadImage("assets/backgrounds/layer_3.png"),
 		},
-		characterTileset: LoadImage("assets/characters/hero.png"),
+		hero: sprites.NewCharacter(
+			sprites.NewSpriteSheet(LoadImage("assets/characters/hero.png"), 448, 616, 56),
+			100, 200,
+		),
 	}
 }
 
@@ -57,7 +62,7 @@ func main() {
 }
 
 func LoadImage(path string) *ebiten.Image {
-	img, _, err := ebitenutil.NewImageFromFile(path)
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets, path)
 	if err != nil {
 		log.Fatal(err)
 	}
