@@ -2,6 +2,8 @@ package sprites
 
 import (
 	"bounding-brave/animation"
+	"image"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -30,7 +32,9 @@ func (s CharacterState) Tiles() (first, last int) {
 type Character struct {
 	spriteSheet *SpriteSheet
 	x, y        float64
+	dx, dy      float64
 	state       CharacterState
+	flipped     bool
 	animat      *animation.Animation
 }
 
@@ -38,26 +42,55 @@ func (c *Character) Draw(screen *ebiten.Image) {
 	indx := c.animat.Frame()
 	img := c.spriteSheet.Tile(indx)
 	opts := &ebiten.DrawImageOptions{}
+	if c.flipped {
+		opts.GeoM.Scale(-1, 1)
+		opts.GeoM.Translate(float64(img.Bounds().Dx()), 0)
+	}
 	opts.GeoM.Translate(c.x, c.y)
 	screen.DrawImage(img, opts)
 }
 
 func (c *Character) Update() {
 	prevState := c.state
-	c.state = Idle
+	c.reset()
 	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		c.x -= 1
+		c.dx -= 0.1
 		c.state = Running
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyRight) {
-		c.x += 1
+		c.flipped = true
+	} else if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyRight) {
+		c.dx += 0.1
 		c.state = Running
+		c.flipped = false
+	} else {
+		c.dx = 0
 	}
+	if ebiten.IsKeyPressed(ebiten.KeySpace) ||
+		ebiten.IsKeyPressed(ebiten.KeyW) ||
+		ebiten.IsKeyPressed(ebiten.KeyUp) {
+		c.dy = 5
+	}
+	if math.Abs(c.dx) > 1 {
+		c.dx = c.dx / math.Abs(c.dx) // set 1 if dx is greater
+	}
+	if math.Abs(c.dx) > 1 {
+		c.dx = c.dx / math.Abs(c.dx) // set 1 if dx is greater
+	}
+	c.x += c.dx
 
 	if c.state != prevState {
 		c.animat.ChangeBounds(c.state.Tiles())
 	}
 	c.animat.Update()
+}
+
+func (c *Character) Collide(collidable image.Rectangle) {
+	if c.dy > 0 {
+		c.y = float64(collidable.Min.Y) - float64(c.spriteSheet.tileHeight)
+	}
+}
+
+func (c *Character) reset() {
+	c.state = Idle
 }
 
 func NewCharacter(spriteSheet *SpriteSheet, x, y float64) *Character {
