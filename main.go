@@ -15,10 +15,16 @@ var assets embed.FS
 type Game struct {
 	backgrounds []*ebiten.Image
 	hero        *sprites.Character
+	terrains    []*sprites.Terrain
 }
 
 func (g *Game) Update() error {
 	g.hero.Update()
+	for _, terrain := range g.terrains {
+		if terrain.Bounds().Overlaps(g.hero.Bounds()) {
+			g.hero.Collides(terrain)
+		}
+	}
 	return nil
 }
 
@@ -29,6 +35,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(background, opts)
 	}
 
+	// solid objects
+	for _, terrain := range g.terrains {
+		terrain.Draw(screen)
+	}
+
 	g.hero.Draw(screen)
 }
 
@@ -37,6 +48,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func InitGame() *Game {
+	terrainTileSet := LoadImage("assets/terrains.png")
 	return &Game{
 		backgrounds: []*ebiten.Image{
 			LoadImage("assets/backgrounds/layer_1.png"),
@@ -47,6 +59,9 @@ func InitGame() *Game {
 			sprites.NewSpriteSheet(LoadImage("assets/characters/hero.png"), 448, 616, 56),
 			100, 200,
 		),
+		terrains: []*sprites.Terrain{
+			sprites.NewTerrain(terrainTileSet, 100, 300, 120, 168, 70, 23),
+		},
 	}
 }
 

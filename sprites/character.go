@@ -70,10 +70,7 @@ func (c *Character) Update() {
 		c.dy = 5
 	}
 	if math.Abs(c.dx) > 1 {
-		c.dx = c.dx / math.Abs(c.dx) // set 1 if dx is greater
-	}
-	if math.Abs(c.dx) > 1 {
-		c.dx = c.dx / math.Abs(c.dx) // set 1 if dx is greater
+		c.dx = c.dx / math.Abs(c.dx) // set 1 if dx is greater (only magnitude)
 	}
 	c.x += c.dx
 
@@ -83,10 +80,19 @@ func (c *Character) Update() {
 	c.animat.Update()
 }
 
-func (c *Character) Collide(collidable image.Rectangle) {
+func (c *Character) Collides(collidable Sprite) {
+	bounds := collidable.Bounds()
 	if c.dy > 0 {
-		c.y = float64(collidable.Min.Y) - float64(c.spriteSheet.tileHeight)
+		c.y = float64(bounds.Min.Y) - float64(c.spriteSheet.tileHeight)
 	}
+}
+
+func (c *Character) Bounds() image.Rectangle {
+	return image.Rect(
+		int(c.x), int(c.y),
+		int(c.x)+c.spriteSheet.tileWidth,
+		int(c.y)+c.spriteSheet.sheetHeight,
+	)
 }
 
 func (c *Character) reset() {
