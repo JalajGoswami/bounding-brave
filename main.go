@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bounding-brave/config"
 	"bounding-brave/sprites"
 	"embed"
 	"log"
@@ -44,7 +45,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 640, 360
+	return config.SCREEN_WIDTH, config.SCREEN_HEIGHT
 }
 
 func InitGame() *Game {
@@ -66,7 +67,10 @@ func InitGame() *Game {
 }
 
 func main() {
-	ebiten.SetWindowSize(1280, 720)
+	ebiten.SetWindowSize(
+		config.PIXED_DENSITY*config.SCREEN_WIDTH,
+		config.PIXED_DENSITY*config.SCREEN_HEIGHT,
+	)
 	ebiten.SetWindowTitle("Bounding Brave")
 
 	game := InitGame()

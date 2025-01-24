@@ -67,12 +67,17 @@ func (c *Character) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeySpace) ||
 		ebiten.IsKeyPressed(ebiten.KeyW) ||
 		ebiten.IsKeyPressed(ebiten.KeyUp) {
-		c.dy = 5
+		c.dy = -2
 	}
+	c.dy += 0.1
 	if math.Abs(c.dx) > 1 {
 		c.dx = c.dx / math.Abs(c.dx) // set 1 if dx is greater (only magnitude)
 	}
+	if c.dy > 5 {
+		c.dy = 5
+	}
 	c.x += c.dx
+	c.y += c.dy
 
 	if c.state != prevState {
 		c.animat.ChangeBounds(c.state.Tiles())
@@ -89,9 +94,9 @@ func (c *Character) Collides(collidable Sprite) {
 
 func (c *Character) Bounds() image.Rectangle {
 	return image.Rect(
-		int(c.x), int(c.y),
-		int(c.x)+c.spriteSheet.tileWidth,
-		int(c.y)+c.spriteSheet.sheetHeight,
+		int(c.x+15), int(c.y+23),
+		int(c.x)+c.spriteSheet.tileWidth-15,
+		int(c.y)+c.spriteSheet.tileHeight,
 	)
 }
 
