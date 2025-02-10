@@ -44,6 +44,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	g.hero.Draw(screen)
+	if config.DebugPrintText != "" {
+		ebitenutil.DebugPrint(screen, config.DebugPrintText)
+		config.DebugPrintText = ""
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

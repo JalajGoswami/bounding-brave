@@ -8,3 +8,5 @@ const PIXED_DENSITY = 2
 // ranges from 0-999 its value increment after each frame,
 // can be used to generate subsets like 0-59 by Tick%60
 var Tick = 0
+
+var DebugPrintText string
