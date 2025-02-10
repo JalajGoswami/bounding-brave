@@ -4,6 +4,7 @@ import (
 	"bounding-brave/config"
 	"bounding-brave/sprites"
 	"embed"
+	"image"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -20,6 +21,7 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
+	config.Tick = (config.Tick + 1) % 1000
 	g.hero.Update()
 	for _, terrain := range g.terrains {
 		if terrain.Bounds().Overlaps(g.hero.Bounds()) {
@@ -59,9 +61,12 @@ func InitGame() *Game {
 		hero: sprites.NewCharacter(
 			sprites.NewSpriteSheet(LoadImage("assets/characters/hero.png"), 448, 616, 56),
 			100, 200,
+			image.Pt(15, 23),
 		),
 		terrains: []*sprites.Terrain{
 			sprites.NewTerrain(terrainTileSet, 100, 300, 120, 168, 70, 23),
+			sprites.NewTerrain(terrainTileSet, 170, 180, 216, 144, 48, 120),
+			sprites.NewTerrain(terrainTileSet, 100, 100, 120, 168, 70, 23),
 		},
 	}
 }
