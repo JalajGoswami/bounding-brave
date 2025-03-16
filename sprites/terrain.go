@@ -1,6 +1,7 @@
 package sprites
 
 import (
+	"bounding-brave/engine"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,13 +14,14 @@ type Terrain struct {
 	width, height int
 }
 
-func (t *Terrain) Draw(screen *ebiten.Image) {
+func (t *Terrain) Draw(scene *engine.Scene) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(t.x, t.y)
+	scene.Camera.ApplyCam(&opts.GeoM)
 	img := t.tileSet.SubImage(
 		image.Rect(t.tileX, t.tileY, t.tileX+t.width, t.tileY+t.height),
 	).(*ebiten.Image)
-	screen.DrawImage(img, opts)
+	scene.Screen.DrawImage(img, opts)
 }
 
 func (t *Terrain) Update() {}

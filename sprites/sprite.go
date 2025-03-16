@@ -1,13 +1,16 @@
 package sprites
 
 import (
+	"bounding-brave/engine"
 	"image"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Sprite interface {
-	Draw(screen *ebiten.Image)
+	Draw(scene *engine.Scene)
 	Update()
+	Bounds() image.Rectangle
+}
+
+type Box interface {
 	Bounds() image.Rectangle
 }

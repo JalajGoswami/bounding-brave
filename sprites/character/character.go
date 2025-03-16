@@ -1,8 +1,11 @@
-package sprites
+package character
 
 import (
-	"bounding-brave/animation"
+	"bounding-brave/config"
+	"bounding-brave/engine"
+	"bounding-brave/sprites"
 	"bounding-brave/utils"
+	"fmt"
 	"image"
 	"math"
 
@@ -10,77 +13,20 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type CharacterState uint8
-
-const (
-	Idle CharacterState = iota
-	Attacking
-	Running
-	JumpPrep
-	JumpAscent
-	JumpDescent
-	JumpLanding
-	JumpReload
-)
-
-func (s CharacterState) Tiles() (first, last, repeat int) {
-	repeat = -1
-	switch s {
-	case Idle:
-		first = 0
-		last = 5
-	case Running:
-		first = 15
-		last = 23
-	case JumpPrep:
-		first = 24
-		last = 25
-		repeat = 0
-	case JumpAscent:
-		first = 26
-		last = 29
-	case JumpDescent:
-		first = 33
-		last = 36
-	case JumpLanding:
-		first = 37
-		last = 39
-		repeat = 0
-	case JumpReload:
-		first = 30
-		last = 32
-		repeat = 0
-	}
-	return
-}
-
-func (s CharacterState) Next() CharacterState {
-	next := s
-	switch s {
-	case JumpPrep:
-		next = JumpAscent
-	case JumpLanding:
-		next = Idle
-	case JumpReload:
-		next = JumpAscent
-	}
-	return next
-}
-
 type Character struct {
-	spriteSheet     *SpriteSheet
+	spriteSheet     *sprites.SpriteSheet
 	x, y            float64
 	dx, dy          float64
 	state           CharacterState
 	flipped         bool
-	animat          *animation.Animation
+	animat          *engine.Animation
 	posInSrcImg     image.Point
 	characterWidth  int
 	characterHeight int
 	isSecondJump    bool
 }
 
-func (c *Character) Draw(screen *ebiten.Image) {
+func (c *Character) Draw(scene *engine.Scene) {
 	indx := c.animat.Frame()
 	img := c.spriteSheet.Tile(indx)
 	opts := &ebiten.DrawImageOptions{}
@@ -90,7 +36,8 @@ func (c *Character) Draw(screen *ebiten.Image) {
 	}
 	opts.GeoM.Translate(c.x, c.y)
 	opts.GeoM.Translate(float64(-c.posInSrcImg.X), float64(-c.posInSrcImg.Y))
-	screen.DrawImage(img, opts)
+	scene.Camera.ApplyCam(&opts.GeoM)
+	scene.Screen.DrawImage(img, opts)
 }
 
 func (c *Character) Update() {
@@ -116,7 +63,7 @@ func (c *Character) Update() {
 	if (inpututil.IsKeyJustPressed(ebiten.KeySpace) ||
 		inpututil.IsKeyJustPressed(ebiten.KeyW) ||
 		inpututil.IsKeyJustPressed(ebiten.KeyUp)) && !c.isSecondJump {
-		c.dy = -2
+		c.dy = -3
 		if c.state == JumpAscent || c.state == JumpDescent {
 			c.state = JumpReload
 			c.isSecondJump = true
@@ -152,10 +99,10 @@ func (c *Character) Update() {
 			c.animat.ChangeBounds(c.state.Tiles())
 		}
 	}
-
+	config.DebugPrintText = fmt.Sprintln(c.state)
 }
 
-func (c *Character) Collides(collidable Sprite) {
+func (c *Character) Collides(collidable sprites.Box) {
 	bounds := collidable.Bounds()
 	dx, dy := utils.RectIntersectFloat(bounds, c.x, c.y, c.characterWidth, c.characterHeight)
 	if dx < dy {
@@ -194,16 +141,16 @@ func (c *Character) reset() {
 	}
 }
 
-func NewCharacter(spriteSheet *SpriteSheet, x, y float64, posInSrcImg image.Point) *Character {
+func NewCharacter(spriteSheet *sprites.SpriteSheet, x, y float64, posInSrcImg image.Point) *Character {
 	first, last, repeat := Idle.Tiles()
-	characterHeight := spriteSheet.tileHeight - posInSrcImg.Y
-	characterWidth := spriteSheet.tileWidth - (2 * posInSrcImg.X)
+	characterHeight := spriteSheet.TileHeight - posInSrcImg.Y
+	characterWidth := spriteSheet.TileWidth - (2 * posInSrcImg.X)
 	return &Character{
 		spriteSheet:     spriteSheet,
 		x:               x,
 		y:               y,
 		state:           Idle,
-		animat:          animation.NewAnimation(first, last, repeat, 100),
+		animat:          engine.NewAnimation(first, last, repeat, 100),
 		posInSrcImg:     posInSrcImg,
 		characterWidth:  characterWidth,
 		characterHeight: characterHeight,

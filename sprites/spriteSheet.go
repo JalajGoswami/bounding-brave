@@ -8,17 +8,17 @@ import (
 
 type SpriteSheet struct {
 	tileSet     *ebiten.Image
-	sheetWidth  int
-	sheetHeight int
-	tileWidth   int
-	tileHeight  int
+	SheetWidth  int
+	SheetHeight int
+	TileWidth   int
+	TileHeight  int
 }
 
 func (s *SpriteSheet) Tile(index int) *ebiten.Image {
-	pos := index * s.tileWidth
-	x := pos % s.sheetWidth
-	y := (pos / s.sheetWidth) * s.tileHeight
-	rect := image.Rect(x, y, x+s.tileWidth, y+s.tileHeight)
+	pos := index * s.TileWidth
+	x := pos % s.SheetWidth
+	y := (pos / s.SheetWidth) * s.TileHeight
+	rect := image.Rect(x, y, x+s.TileWidth, y+s.TileHeight)
 	subImg := s.tileSet.SubImage(rect).(*ebiten.Image)
 	return subImg
 }
@@ -26,9 +26,9 @@ func (s *SpriteSheet) Tile(index int) *ebiten.Image {
 func NewSpriteSheet(tileSet *ebiten.Image, width, height, tileSize int) *SpriteSheet {
 	return &SpriteSheet{
 		tileSet:     tileSet,
-		sheetWidth:  width,
-		sheetHeight: height,
-		tileWidth:   tileSize,
-		tileHeight:  tileSize,
+		SheetWidth:  width,
+		SheetHeight: height,
+		TileWidth:   tileSize,
+		TileHeight:  tileSize,
 	}
 }
